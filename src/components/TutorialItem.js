@@ -1,4 +1,5 @@
 import React from 'react';
+import {Link} from 'react-router-dom';
 import { 
   makeStyles, 
   Card, 
@@ -12,18 +13,22 @@ const TutorialItem = props => {
   const tutorial = props.item;
 
   return (
-    <Card 
-      key={tutorial.id}
-      className={classes.root}>
-      <CardMedia
-        className={classes.media}
-        image={tutorial.image}/>
-      <CardContent>
-        <Typography variant="h5">
-          {tutorial.title}
-        </Typography>
-      </CardContent>
-    </Card>
+    <Link 
+      className={classes.link} 
+      to={`/tutorial/${tutorial.id}`}>
+      <Card 
+        key={tutorial.id}
+        className={classes.root}>
+        <CardMedia
+          className={classes.media}
+          image={tutorial.image}/>
+        <CardContent>
+          <Typography variant="h5">
+            {tutorial.title}
+          </Typography>
+        </CardContent>
+      </Card>
+    </Link>
   )
 }
 
@@ -34,7 +39,12 @@ const useStyles = makeStyles(theme => ({
   },
   media: {
     height: 250
+  }, 
+  link: {
+    textDecoration: "none",
+    color: theme.palette.text.primary 
   }
+
 }));
 
 export default TutorialItem;
