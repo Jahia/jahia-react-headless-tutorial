@@ -1,7 +1,8 @@
 import React from 'react';
 import { Paper, Typography, CardMedia, makeStyles } from '@material-ui/core';
 import { useParams } from 'react-router-dom';
-import data from '../data/items.json';
+import request from 'graphql-request';
+import environment from '../config';
 
 const TutorialDetail = (props) => {
   const classes = useStyles();
@@ -15,9 +16,37 @@ const TutorialDetail = (props) => {
 
   let { tutorialId } = useParams();
 
+  const query = `{
+    jcr (workspace: LIVE) {
+      queryResults: nodeById(uuid: "${tutorialId}") {
+        uuid
+        title: property(name:"jcr:title") { value }
+        body: property(name:"body") { value }
+        image: property(name: "image") { refNode {path} }
+        publishedDate: property(name: "jcr:lastModified") {value}
+        publishedBy: property(name: "jcr:lastModifiedBy") {value}
+      }
+    }
+  }`
+
   React.useEffect(() => {
-    setTutorial(data.find((tutorial => tutorial.id === tutorialId)));
-  },[tutorialId, tutorial]);
+    request(environment.graphQLEndpoint, query).then(results => {
+      const tutorialNode = results.jcr.queryResults;
+
+      let item = {
+        id: tutorialNode.uuid,
+        title: tutorialNode.title.value,
+        body: tutorialNode.body.value,
+        image: `${environment.mediaBasePath}/${tutorialNode.image.refNode.path}`,
+        publishedDate: tutorialNode.publishedDate.value,
+        publishedBy: tutorialNode.publishedBy.value
+      }
+      
+      setTutorial(item);
+    })
+    .catch(error => console.log(error));
+    
+  },[query]);
 
   return (
     <Paper 
